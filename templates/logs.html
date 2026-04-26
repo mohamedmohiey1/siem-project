@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ar">
+
+<head>
+    <meta charset="UTF-8">
+    <title>سجل الأحداث | SIEM</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #0a0e14;
+            font-family: 'Inter', sans-serif;
+            color: #eef2ff;
+            padding: 2rem;
+            direction: rtl;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: auto;
+        }
+        
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .filter-card {
+            background: #11161f;
+            border-radius: 24px;
+            padding: 1.2rem;
+            margin-bottom: 2rem;
+            border: 1px solid #2a3240;
+        }
+        
+        .filter-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: flex-end;
+        }
+        
+        .filter-group {
+            flex: 1;
+            min-width: 160px;
+        }
+        
+        label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: #9aaebf;
+            display: block;
+            margin-bottom: 0.3rem;
+        }
+        
+        input,
+        select {
+            width: 100%;
+            background: #1a212c;
+            border: 1px solid #2e3a48;
+            padding: 0.6rem 1rem;
+            border-radius: 20px;
+            color: #eef2ff;
+            font-family: inherit;
+        }
+        
+        button {
+            background: #0f6bff;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 40px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #0f131c;
+            border-radius: 24px;
+            overflow: hidden;
+        }
+        
+        th,
+        td {
+            padding: 1rem;
+            text-align: right;
+            border-bottom: 1px solid #1f2a3a;
+        }
+        
+        th {
+            background: #0b0f17;
+            color: #80b7ff;
+            font-weight: 600;
+        }
+        
+        code {
+            background: #1e2a3a;
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+        }
+        
+        .badge {
+            padding: 0.2rem 0.6rem;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        
+        .badge-success {
+            background: #1e7e34;
+            color: white;
+        }
+        
+        .badge-danger {
+            background: #b22234;
+            color: white;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+        }
+        
+        .pagination a,
+        .pagination span {
+            background: #1a212c;
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+            text-decoration: none;
+            color: #eef2ff;
+        }
+        
+        .active a {
+            background: #0f6bff;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1><i class="fas fa-history"></i> سجل الأحداث</h1>
+        <div class="filter-card">
+            <form method="GET" class="filter-form">
+                <div class="filter-group"><label>IP المصدر</label><input name="src_ip" value="{{ src_ip }}" placeholder="مثال: 192.168.1.1"></div>
+                <div class="filter-group"><label>الحالة</label><select name="status"><option value="">الكل</option><option {% if selected_status=='success' %}selected{% endif %}>success</option><option {% if selected_status=='failed' %}selected{% endif %}>failed</option></select></div>
+                <div class="filter-group"><button><i class="fas fa-search"></i> بحث</button></div>
+            </form>
+        </div>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>التوقيت</th>
+                        <th>IP</th>
+                        <th>المستخدم</th>
+                        <th>الحدث</th>
+                        <th>الحالة</th>
+                        <th>المسار</th>
+                        <th>التفاصيل</th>
+                    </tr>
+                </thead>
+                <tbody>{% for log in logs.items %}
+                    <tr>
+                        <td>{{ log.id }}</td>
+                        <td>{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                        <td><code>{{ log.src_ip }}</code></td>
+                        <td>{{ log.username or '-' }}</td>
+                        <td>{{ log.event_type }}</td>
+                        <td>{% if log.status == 'success' %}<span class="badge badge-success">success</span>{% elif log.status == 'failed' %}<span class="badge badge-danger">failed</span>{% else %}{{ log.status or '-' }}{% endif %}</td>
+                        <td>{{ log.request_path or '-' }} {{ log.method or '' }}</td>
+                        <td style="max-width:250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ log.details[:80] }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8">لا توجد سجلات</td>
+                    </tr>{% endfor %}</tbody>
+            </table>
+        </div>
+        <div class="pagination">
+            {% if logs.has_prev %}<a href="{{ url_for('view_logs', page=logs.prev_num, src_ip=src_ip, status=selected_status) }}">السابق</a>{% endif %} {% for p in logs.iter_pages() %}{% if p %}<a href="{{ url_for('view_logs', page=p, src_ip=src_ip, status=selected_status) }}"
+                class="{% if p==logs.page %}active{% endif %}">{{ p }}</a>{% else %}<span>...</span>{% endif %}{% endfor %} {% if logs.has_next %}<a href="{{ url_for('view_logs', page=logs.next_num, src_ip=src_ip, status=selected_status) }}">التالي</a>{%
+            endif %}
+        </div>
+    </div>
+</body>
+
+</html>

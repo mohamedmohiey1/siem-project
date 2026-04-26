@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ar">
+
+<head>
+    <meta charset="UTF-8">
+    <title>التنبيهات الأمنية | SIEM</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            background: #0a0e14;
+            font-family: 'Inter', sans-serif;
+            color: #eef2ff;
+            padding: 2rem;
+            direction: rtl;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: auto;
+        }
+        
+        .filter-bar {
+            background: #11161f;
+            border-radius: 28px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1rem;
+            align-items: end;
+            flex-wrap: wrap;
+        }
+        
+        select,
+        button {
+            background: #1a212c;
+            border: 1px solid #2e3a48;
+            padding: 0.5rem 1rem;
+            border-radius: 30px;
+            color: white;
+        }
+        
+        button {
+            background: #0f6bff;
+            border: none;
+            cursor: pointer;
+        }
+        
+        table {
+            width: 100%;
+            background: #0f131c;
+            border-radius: 24px;
+            overflow: hidden;
+            border-collapse: collapse;
+        }
+        
+        th,
+        td {
+            padding: 1rem;
+            text-align: right;
+            border-bottom: 1px solid #1f2a3a;
+        }
+        
+        th {
+            background: #0b0f17;
+            color: #7aa9ff;
+        }
+        
+        .badge {
+            padding: 0.2rem 0.7rem;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+        
+        .badge-crit {
+            background: #b91c1c;
+        }
+        
+        .badge-high {
+            background: #e67e22;
+        }
+        
+        .badge-med {
+            background: #f1c40f;
+            color: #1e1e2f;
+        }
+        
+        .badge-low {
+            background: #2980b9;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1><i class="fas fa-bell"></i> قائمة التنبيهات الأمنية</h1>
+        <div class="filter-bar">
+            <form method="GET" style="display: flex; gap: 0.8rem; width: 100%;">
+                <select name="severity"><option value="">كل الخطورة</option><option {% if selected_severity=='Low' %}selected{% endif %}>Low</option><option {% if selected_severity=='Medium' %}selected{% endif %}>Medium</option><option {% if selected_severity=='High' %}selected{% endif %}>High</option><option {% if selected_severity=='Critical' %}selected{% endif %}>Critical</option></select>
+                <button type="submit"><i class="fas fa-filter"></i> فلترة</button>
+            </form>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>التوقيت</th>
+                    <th>الخطورة</th>
+                    <th>القاعدة</th>
+                    <th>الوصف</th>
+                    <th>IP المصدر</th>
+                </tr>
+            </thead>
+            <tbody>{% for a in alerts.items %}
+                <tr>
+                    <td>{{ a.id }}</td>
+                    <td>{{ a.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                    <td><span class="badge {% if a.severity=='Critical' %}badge-crit{% elif a.severity=='High' %}badge-high{% elif a.severity=='Medium' %}badge-med{% else %}badge-low{% endif %}">{{ a.severity }}</span></td>
+                    <td>{{ a.rule_name }}</td>
+                    <td>{{ a.description }}</td>
+                    <td><code>{{ a.src_ip or '-' }}</code></td>
+                </tr>{% else %}
+                <tr>
+                    <td colspan="6">لا توجد تنبيهات</td>
+                </tr>{% endfor %}</tbody>
+        </table>
+        <div class="pagination" style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 2rem;">
+            {% if alerts.has_prev %}<a href="{{ url_for('view_alerts', page=alerts.prev_num, severity=selected_severity) }}" style="background:#1a212c; padding:0.5rem 1rem; border-radius:30px;">السابق</a>{% endif %} {% for p in alerts.iter_pages() %}{%
+            if p %}<a href="{{ url_for('view_alerts', page=p, severity=selected_severity) }}" style="background:#1a212c; padding:0.5rem 1rem; border-radius:30px;">{{ p }}</a>{% endif %}{% endfor %} {% if alerts.has_next %}<a href="{{ url_for('view_alerts', page=alerts.next_num, severity=selected_severity) }}"
+                style="background:#1a212c; padding:0.5rem 1rem; border-radius:30px;">التالي</a>{% endif %}
+        </div>
+    </div>
+</body>
+
+</html>
