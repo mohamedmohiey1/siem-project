@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ar">
+
+<head>
+    <meta charset="UTF-8">
+    <title>طلباتي - SIEM</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            background: #0a0e14;
+            font-family: 'Inter', sans-serif;
+            padding: 2rem;
+            direction: rtl;
+            color: #eef2ff;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: auto;
+        }
+        
+        .card {
+            background: #11161f;
+            border-radius: 28px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th,
+        td {
+            padding: 0.8rem;
+            border-bottom: 1px solid #1f2a3a;
+            text-align: right;
+        }
+        
+        .badge-completed {
+            background: #2ecc71;
+            padding: 0.2rem 0.5rem;
+            border-radius: 20px;
+        }
+        
+        .badge-pending {
+            background: #e67e22;
+        }
+        
+        .badge-analyzing {
+            background: #3498db;
+        }
+        
+        .btn {
+            background: #0f6bff;
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+            text-decoration: none;
+            color: white;
+        }
+        
+        .notification-badge {
+            background: #e74c3c;
+            border-radius: 50%;
+            padding: 0.2rem 0.6rem;
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div style="display:flex; justify-content:space-between;">
+            <h1><i class="fas fa-list"></i> طلبات التحليل</h1>
+            <div><a href="/manager/request" class="btn">طلب جديد</a> <a href="/logout" style="color:#80b7ff;">خروج</a></div>
+        </div>
+        {% if new_count > 0 %}
+        <div class="card" style="background:#0f2b1f;">🔔 لديك {{ new_count }} تقرير جديد جاهز للاطلاع!</div>
+        {% endif %}
+        <div class="card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>التاريخ</th>
+                        <th>الملف</th>
+                        <th>الوصف</th>
+                        <th>الحالة</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for req in requests %}
+                    <tr>
+                        <td>{{ req.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>{{ req.original_filename }}</td>
+                        <td>{{ req.request_message or '-' }}</td>
+                        <td>{% if req.status == 'pending' %}<span class="badge-pending">قيد الانتظار</span>{% elif req.status == 'analyzing' %}<span class="badge-analyzing">جارٍ التحليل</span>{% else %}<span class="badge-completed">مكتمل</span>{% endif %}</td>
+                        <td>{% if req.status == 'completed' %}<a href="/manager/view_report/{{ req.id }}" class="btn">عرض التقرير</a>{% else %}<span style="color:#9aaebf;">قيد المعالجة</span>{% endif %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -5,3 +5,6 @@ instance/
 uploads/
 *.db
 .env
+*.exe
+*.pdf
+static/reports/

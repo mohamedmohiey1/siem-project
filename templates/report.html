@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ar">
+
+<head>
+    <meta charset="UTF-8">
+    <title>التقرير - SIEM</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(145deg, #0d1117, #0a0c10);
+            font-family: 'Inter', sans-serif;
+            padding: 2rem;
+            direction: rtl;
+            color: #eef2ff;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: auto;
+        }
+        
+        .card {
+            background: #11161f;
+            border-radius: 28px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #2a3240;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stat {
+            background: rgba(18, 22, 28, 0.8);
+            border-radius: 20px;
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .stat h3 {
+            font-size: 1.8rem;
+            margin: 0.5rem 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th,
+        td {
+            padding: 0.8rem;
+            text-align: right;
+            border-bottom: 1px solid #1f2a3a;
+        }
+        
+        th {
+            color: #80b7ff;
+        }
+        
+        .btn {
+            background: #0f6bff;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+            margin-left: 0.5rem;
+            transition: 0.2s;
+        }
+        
+        .btn-success {
+            background: #2ecc71;
+        }
+        
+        .btn-pdf {
+            background: #e67e22;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.05);
+        }
+        
+        .logout {
+            text-align: left;
+            margin-bottom: 1rem;
+        }
+        
+        .logout a {
+            color: #80b7ff;
+            text-decoration: none;
+        }
+        
+        code {
+            background: #1e2a3a;
+            padding: 0.2rem 0.4rem;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="logout">
+            <a href="{{ url_for('report_pdf') }}" class="btn btn-pdf"><i class="fas fa-file-pdf"></i> تحميل التقرير PDF</a>
+            <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</a>
+        </div>
+        <h1><i class="fas fa-chart-line"></i> تقرير تحليل السجلات</h1>
+
+        <div class="stats-grid">
+            <div class="stat"><i class="fas fa-database"></i>
+                <h3>{{ report.total_logs }}</h3><small>إجمالي السجلات</small></div>
+            <div class="stat"><i class="fas fa-bell"></i>
+                <h3>{{ report.total_alerts }}</h3><small>التنبيهات</small></div>
+            <div class="stat"><i class="fas fa-check-circle"></i>
+                <h3>{{ "%.1f"|format(report.success_rate) }}%</h3><small>نسبة النجاح</small></div>
+            <div class="stat"><i class="fas fa-times-circle"></i>
+                <h3>{{ report.failed_count }}</h3><small>محاولات فاشلة</small></div>
+        </div>
+
+        <div class="card">
+            <h3>أكثر 5 عناوين IP نشاطاً</h3>
+            </table>
+            <thead>
+                <tr>
+                    <th>IP</th>
+                    <th>عدد السجلات</th>
+                </tr>
+            </thead>
+            <tbody>{% for ip, count in report.top_ips %}
+                <tr>}<code>{{ ip }}</code></td>
+                    <td>{{ count }}</td>
+                </tr>{% else %}
+                <tr>
+                    <td colspan="2">لا توجد بيانات</td>
+                </tr>{% endfor %}</tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h3>آخر التنبيهات</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>التوقيت</th>
+                        <th>الخطورة</th>
+                        <th>الوصف</th>
+                    </tr>
+                </thead>
+                <tbody>{% for a in report.recent_alerts %}
+                    <tr>
+                        <td>{{ a.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                        <td>{{ a.severity }}</td>
+                        <td>{{ a.description }}</td>
+                    </tr>{% else %}
+                    <tr>
+                        <td colspan="3">لا توجد تنبيهات</td>
+                    </tr>{% endfor %}</tbody>
+            </table>
+        </div>
+
+        <!-- فقط للمانجر (وليست للأدمن) -->
+        {% if current_user.role == 'manager' %}
+        <div class="card">
+            <h3><i class="fas fa-exchange-alt"></i> نظام طلبات التحليل</h3>
+            <p>استخدم الأزرار أدناه لإرسال ملف إلى المسؤول أو متابعة طلباتك.</p>
+            <a href="/manager/request" class="btn btn-success"><i class="fas fa-upload"></i> 📤 إرسال ملف للتحليل</a>
+            <a href="/manager/requests" class="btn"><i class="fas fa-list"></i> 📋 طلباتي</a>
+        </div>
+        {% endif %}
+    </div>
+</body>
+
+</html>

@@ -1,5 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin
 
 db = SQLAlchemy()
 
@@ -65,3 +67,28 @@ class NetworkAlert(db.Model):
     description = db.Column(db.Text, nullable=False)
     details = db.Column(db.JSON, nullable=True)
     is_resolved = db.Column(db.Boolean, default=False)
+
+class AnalysisRequest(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    manager_username = db.Column(db.String(80), nullable=False)
+    request_message = db.Column(db.Text, nullable=True)
+    original_filename = db.Column(db.String(200), nullable=False)   # original name
+    stored_filename = db.Column(db.String(200), nullable=False)     # unique name in uploads
+    status = db.Column(db.String(20), default='pending')           # pending, analyzing, completed
+    report_summary = db.Column(db.Text, nullable=True)             # short summary for listing
+    report_data = db.Column(db.JSON, nullable=True)                # full analysis (stats, alerts, recommendations)
+    report_generated_at = db.Column(db.DateTime, nullable=True)
+    is_read = db.Column(db.Boolean, default=False)                 # for manager notification
+
+class User(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    password_hash = db.Column(db.String(200), nullable=False)
+    role = db.Column(db.String(20), nullable=False, default='manager')  # 'admin' or 'manager'
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
