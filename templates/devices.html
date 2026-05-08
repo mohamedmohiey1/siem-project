@@ -1,92 +1,93 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <title>الأجهزة المتصلة | SIEM</title>
+    <title>Network Devices | SIEM SOC</title>
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
     <style>
+         :root {
+            --bg: #070b14;
+            --panel: rgba(20, 28, 45, 0.6);
+            --border: rgba(0, 170, 255, 0.25);
+            --text: #e6f1ff;
+            --muted: #93a4bf;
+            --blue: #00c2ff;
+            --success: #2ecc71;
+            --danger: #ff3b3b;
+        }
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
         }
         
         body {
-            background: linear-gradient(145deg, #0d1117 0%, #0a0c10 100%);
-            font-family: 'Inter', sans-serif;
-            padding: 2rem;
-            direction: rtl;
-            min-height: 100vh;
+            background: radial-gradient(circle at top right, #0a1a33, var(--bg));
+            color: var(--text);
+            padding: 25px;
         }
         
         .container {
             max-width: 1400px;
-            margin: 0 auto;
+            margin: auto;
         }
-        /* رأس الصفحة */
+        /* HEADER */
         
-        .page-header {
-            margin-bottom: 2rem;
+        .header {
             text-align: center;
+            margin-bottom: 25px;
         }
         
-        .page-header h1 {
-            font-size: 2rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+        .header h1 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, #fff, var(--blue));
             -webkit-background-clip: text;
-            background-clip: text;
             color: transparent;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.8rem;
         }
         
-        .badge-stats {
-            background: rgba(15, 107, 255, 0.2);
-            border: 1px solid rgba(15, 107, 255, 0.5);
-            border-radius: 40px;
-            padding: 0.2rem 1rem;
-            font-size: 0.7rem;
-            font-weight: 500;
-            color: #80b7ff;
-            margin-right: 0.5rem;
+        .badge {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            background: rgba(0, 194, 255, 0.1);
+            border: 1px solid var(--border);
+            color: var(--muted);
         }
-        /* بطاقات إحصائيات سريعة */
+        /* STATS */
         
-        .stats-mini {
+        .stats {
             display: flex;
             justify-content: center;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+            gap: 12px;
             flex-wrap: wrap;
+            margin-bottom: 20px;
         }
         
-        .stat-mini-card {
-            background: rgba(18, 22, 28, 0.8);
-            backdrop-filter: blur(8px);
-            border-radius: 28px;
-            padding: 0.6rem 1.2rem;
-            border: 1px solid rgba(72, 187, 255, 0.2);
-            font-size: 0.9rem;
-            color: #9aaebf;
+        .stat {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            padding: 8px 14px;
+            border-radius: 14px;
+            font-size: 0.85rem;
+            color: var(--muted);
         }
+        /* TABLE */
         
-        .stat-mini-card i {
-            margin-left: 0.4rem;
-            color: #0f6bff;
-        }
-        /* الجدول العصري */
-        
-        .devices-table-wrapper {
-            background: rgba(18, 22, 28, 0.7);
-            backdrop-filter: blur(4px);
-            border-radius: 28px;
-            border: 1px solid rgba(72, 187, 255, 0.15);
+        .table-wrapper {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 18px;
             overflow-x: auto;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(12px);
         }
         
         table {
@@ -95,134 +96,111 @@
         }
         
         th {
-            background: rgba(10, 12, 16, 0.9);
-            padding: 1.2rem 1rem;
-            text-align: right;
-            font-weight: 600;
-            font-size: 0.85rem;
+            text-align: left;
+            padding: 14px;
+            font-size: 0.8rem;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: #80b7ff;
-            border-bottom: 1px solid rgba(72, 187, 255, 0.2);
+            color: var(--muted);
+            background: rgba(0, 0, 0, 0.25);
         }
         
         td {
-            padding: 1rem;
-            text-align: right;
-            border-bottom: 1px solid rgba(31, 42, 58, 0.5);
-            color: #eef2ff;
+            padding: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.85rem;
         }
         
-        tr:hover td {
-            background: rgba(15, 107, 255, 0.05);
+        tr:hover {
+            background: rgba(0, 194, 255, 0.05);
         }
         
         code {
-            background: #1a212c;
-            padding: 0.2rem 0.5rem;
-            border-radius: 12px;
-            font-size: 0.85rem;
-            color: #c7e0ff;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 3px 6px;
+            border-radius: 8px;
+            color: #cfe8ff;
         }
-        /* أزرار */
+        /* BADGES */
         
-        .btn-detail {
-            background: linear-gradient(90deg, #0f6bff, #0044aa);
-            border: none;
-            padding: 0.4rem 1rem;
-            border-radius: 40px;
-            font-size: 0.75rem;
+        .success {
+            color: var(--success);
             font-weight: 600;
+        }
+        
+        .danger {
+            color: var(--danger);
+            font-weight: 600;
+        }
+        /* BUTTON */
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 10px;
+            text-decoration: none;
+            background: rgba(0, 194, 255, 0.1);
+            border: 1px solid var(--border);
             color: white;
-            text-decoration: none;
+            font-size: 0.75rem;
             transition: 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.3rem;
         }
         
-        .btn-detail:hover {
-            background: linear-gradient(90deg, #1a7aff, #0055cc);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(15, 107, 255, 0.3);
+        .btn:hover {
+            background: var(--blue);
         }
+        /* BACK */
         
-        .success-badge {
-            color: #2ecc71;
-            font-weight: 600;
-            background: rgba(46, 204, 113, 0.1);
-            border-radius: 20px;
-            padding: 0.2rem 0.5rem;
-            display: inline-block;
-        }
-        
-        .failed-badge {
-            color: #e74c3c;
-            font-weight: 600;
-            background: rgba(231, 76, 60, 0.1);
-            border-radius: 20px;
-            padding: 0.2rem 0.5rem;
-            display: inline-block;
-        }
-        
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: rgba(15, 107, 255, 0.1);
-            border-radius: 40px;
-            padding: 0.5rem 1.2rem;
-            margin-top: 2rem;
-            transition: 0.2s;
-            color: #80b7ff;
+        .back {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: var(--muted);
             text-decoration: none;
-            font-weight: 500;
         }
         
-        .back-link:hover {
-            background: rgba(15, 107, 255, 0.2);
-            gap: 0.8rem;
-        }
-        
-        @media (max-width: 768px) {
-            body {
-                padding: 1rem;
-            }
-            th,
-            td {
-                padding: 0.7rem;
-                font-size: 0.8rem;
-            }
-            .btn-detail {
-                padding: 0.3rem 0.8rem;
-            }
+        .back:hover {
+            color: white;
         }
     </style>
 </head>
 
 <body>
+
     <div class="container">
-        <div class="page-header">
-            <h1><i class="fas fa-network-wired"></i> الأجهزة المتصلة بنفس الشبكة <span class="badge-stats"><i class="fas fa-chart-line"></i> سجل النشاط</span></h1>
+
+        <!-- HEADER -->
+        <div class="header">
+            <h1><i class="fas fa-network-wired"></i> Network Devices</h1>
+            <div class="badge">
+                <i class="fas fa-shield-alt"></i> Live Network Monitoring Active
+            </div>
         </div>
-        <div class="stats-mini">
-            <div class="stat-mini-card"><i class="fas fa-desktop"></i> إجمالي الأجهزة: {{ devices|length }}</div>
-            <div class="stat-mini-card"><i class="fas fa-chart-simple"></i> إحصائيات الدخول</div>
-            <div class="stat-mini-card"><i class="fas fa-shield-alt"></i> مراقبة مستمرة</div>
+
+        <!-- STATS -->
+        <div class="stats">
+            <div class="stat"><i class="fas fa-desktop"></i> Devices: {{ devices|length }}</div>
+            <div class="stat"><i class="fas fa-chart-line"></i> Activity Tracking</div>
+            <div class="stat"><i class="fas fa-shield"></i> Security Monitoring</div>
         </div>
-        <div class="devices-table-wrapper">
+
+        <!-- TABLE -->
+        <div class="table-wrapper">
+
             <table>
                 <thead>
                     <tr>
-                        <th>IP</th>
-                        <th>الاسم (Hostname)</th>
-                        <th>أول ظهور</th>
-                        <th>آخر ظهور</th>
-                        <th>✅ نجاح</th>
-                        <th>❌ فشل</th>
-                        <th></th>
+                        <th>IP Address</th>
+                        <th>Hostname</th>
+                        <th>First Seen</th>
+                        <th>Last Seen</th>
+                        <th>Success</th>
+                        <th>Failed</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
+
                 <tbody>
                     {% for dev in devices %}
                     <tr>
@@ -230,22 +208,34 @@
                         <td>{{ dev.hostname or '-' }}</td>
                         <td>{{ dev.first_seen.strftime('%Y-%m-%d %H:%M') }}</td>
                         <td>{{ dev.last_seen.strftime('%Y-%m-%d %H:%M') }}</td>
-                        <td><span class="success-badge">{{ dev.success_count }}</span></td>
-                        <td><span class="failed-badge">{{ dev.failed_count }}</span></td>
-                        <td><a href="{{ url_for('device_details', ip=dev.ip) }}" class="btn-detail"><i class="fas fa-eye"></i> تفاصيل</a></td>
+                        <td class="success">{{ dev.success_count }}</td>
+                        <td class="danger">{{ dev.failed_count }}</td>
+                        <td>
+                            <a href="{{ url_for('device_details', ip=dev.ip) }}" class="btn">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                        </td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="7" style="text-align:center; color:#9aaebf;">لا توجد أجهزة متصلة حتى الآن</td>
+                        <td colspan="7" style="text-align:center; color:#93a4bf;">
+                            No devices detected
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
+
             </table>
+
         </div>
-        <div style="text-align: center;">
-            <a href="/" class="back-link"><i class="fas fa-arrow-right"></i> العودة إلى لوحة التحكم</a>
-        </div>
+
+        <!-- BACK -->
+        <a href="/" class="back">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+
     </div>
+
 </body>
 
 </html>

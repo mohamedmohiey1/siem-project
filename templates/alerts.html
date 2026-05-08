@@ -89,30 +89,45 @@
         .badge-low {
             background: #2980b9;
         }
+        
+        @media (max-width: 800px) {
+            th,
+            td {
+                font-size: 0.8rem;
+                padding: 0.5rem;
+            }
+        }
     </style>
 </head>
 
 <body>
     <div class="container">
-        <h1><i class="fas fa-bell"></i> قائمة التنبيهات الأمنية</h1>
+        <h1><i class="fas fa-bell"></i>Alerts</h1>
         <div class="filter-bar">
             <form method="GET" style="display: flex; gap: 0.8rem; width: 100%;">
-                <select name="severity"><option value="">كل الخطورة</option><option {% if selected_severity=='Low' %}selected{% endif %}>Low</option><option {% if selected_severity=='Medium' %}selected{% endif %}>Medium</option><option {% if selected_severity=='High' %}selected{% endif %}>High</option><option {% if selected_severity=='Critical' %}selected{% endif %}>Critical</option></select>
-                <button type="submit"><i class="fas fa-filter"></i> فلترة</button>
+                <select name="severity">
+                    <option value="">All Severities</option>
+                    <option {% if selected_severity=='Low' %}selected{% endif %}>Low</option>
+                    <option {% if selected_severity=='Medium' %}selected{% endif %}>Medium</option>
+                    <option {% if selected_severity=='High' %}selected{% endif %}>High</option>
+                    <option {% if selected_severity=='Critical' %}selected{% endif %}>Critical</option>
+                </select>
+                <button type="submit"><i class="fas fa-filter"></i> Filter</button>
             </form>
         </div>
         <table>
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>التوقيت</th>
-                    <th>الخطورة</th>
-                    <th>القاعدة</th>
-                    <th>الوصف</th>
-                    <th>IP المصدر</th>
+                    <th>Timestamp</th>
+                    <th>Severity</th>
+                    <th>Rule</th>
+                    <th>Description</th>
+                    <th>Source IP</th>
                 </tr>
             </thead>
-            <tbody>{% for a in alerts.items %}
+            <tbody>
+                {% for a in alerts.items %}
                 <tr>
                     <td>{{ a.id }}</td>
                     <td>{{ a.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
@@ -120,15 +135,18 @@
                     <td>{{ a.rule_name }}</td>
                     <td>{{ a.description }}</td>
                     <td><code>{{ a.src_ip or '-' }}</code></td>
-                </tr>{% else %}
+                </tr>
+                {% else %}
                 <tr>
-                    <td colspan="6">لا توجد تنبيهات</td>
-                </tr>{% endfor %}</tbody>
+                    <td colspan="6">No alerts found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
         </table>
         <div class="pagination" style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 2rem;">
-            {% if alerts.has_prev %}<a href="{{ url_for('view_alerts', page=alerts.prev_num, severity=selected_severity) }}" style="background:#1a212c; padding:0.5rem 1rem; border-radius:30px;">السابق</a>{% endif %} {% for p in alerts.iter_pages() %}{%
-            if p %}<a href="{{ url_for('view_alerts', page=p, severity=selected_severity) }}" style="background:#1a212c; padding:0.5rem 1rem; border-radius:30px;">{{ p }}</a>{% endif %}{% endfor %} {% if alerts.has_next %}<a href="{{ url_for('view_alerts', page=alerts.next_num, severity=selected_severity) }}"
-                style="background:#1a212c; padding:0.5rem 1rem; border-radius:30px;">التالي</a>{% endif %}
+            {% if alerts.has_prev %}<a href="{{ url_for('view_alerts', page=alerts.prev_num, severity=selected_severity) }}" style="background:#1a212c; padding:0.5rem 1rem; border-radius:30px;">Previous</a>{% endif %} {% for p in alerts.iter_pages() %}
+            {% if p %}<a href="{{ url_for('view_alerts', page=p, severity=selected_severity) }}" style="background:#1a212c; padding:0.5rem 1rem; border-radius:30px;">{{ p }}</a>{% endif %} {% endfor %} {% if alerts.has_next %}<a href="{{ url_for('view_alerts', page=alerts.next_num, severity=selected_severity) }}"
+                style="background:#1a212c; padding:0.5rem 1rem; border-radius:30px;">Next</a>{% endif %}
         </div>
     </div>
 </body>

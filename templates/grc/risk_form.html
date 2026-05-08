@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>SIEM SOC | Submit Analysis Request</title>
+    <title>SIEM SOC | {{ 'Edit Risk' if risk else 'Add New Risk' }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -18,7 +18,6 @@
             --bg-deep: #03070f;
             --bg-surface: rgba(12, 22, 40, 0.65);
             --glass-border: rgba(56, 189, 248, 0.25);
-            --glass-highlight: rgba(56, 189, 248, 0.1);
             --primary-glow: #00c6ff;
             --primary-accent: #3b82f6;
             --cyber-cyan: #00f2fe;
@@ -37,7 +36,6 @@
             font-family: 'Inter', sans-serif;
             color: var(--text-primary);
             min-height: 100vh;
-            overflow-x: hidden;
             position: relative;
         }
         
@@ -53,7 +51,7 @@
             pointer-events: none;
             z-index: 0;
         }
-        /* SIDEBAR (glass) */
+        /* SIDEBAR (glass, left aligned) */
         
         .sidebar {
             position: fixed;
@@ -96,7 +94,7 @@
         .agent {
             background: linear-gradient(95deg, rgba(0, 194, 255, 0.12), rgba(59, 130, 246, 0.08));
             border-radius: 20px;
-            padding: 12px 12px;
+            padding: 12px;
             display: flex;
             align-items: center;
             gap: 12px;
@@ -171,7 +169,6 @@
             border-left: 3px solid var(--cyber-cyan);
             box-shadow: 0 2px 8px rgba(0, 194, 255, 0.2);
         }
-        /* MAIN CONTENT */
         
         .main-content {
             margin-left: 280px;
@@ -179,7 +176,6 @@
             position: relative;
             z-index: 2;
         }
-        /* TOPBAR */
         
         .topbar {
             display: flex;
@@ -241,10 +237,7 @@
         
         .logout-btn:hover {
             background: #ff4d4d;
-            border-color: #ff9999;
-            box-shadow: 0 0 12px rgba(255, 77, 77, 0.5);
         }
-        /* GLASS FORM CARD */
         
         .glass-card {
             background: rgba(10, 18, 32, 0.65);
@@ -253,7 +246,7 @@
             border-radius: 28px;
             padding: 2rem;
             transition: all 0.2s;
-            max-width: 700px;
+            max-width: 800px;
             margin: 0 auto;
         }
         
@@ -272,7 +265,6 @@
             border-left: 4px solid var(--cyber-cyan);
             padding-left: 16px;
         }
-        /* FORM STYLES */
         
         .form-group {
             margin-bottom: 1.5rem;
@@ -286,7 +278,6 @@
             margin-bottom: 0.6rem;
             color: var(--text-secondary);
             font-size: 0.85rem;
-            letter-spacing: 0.3px;
         }
         
         .form-label i {
@@ -303,9 +294,8 @@
             color: var(--text-primary);
             font-family: 'Inter', sans-serif;
             font-size: 0.9rem;
-            transition: all 0.2s;
+            transition: 0.2s;
             width: 100%;
-            backdrop-filter: blur(4px);
         }
         
         .form-control:focus,
@@ -317,22 +307,26 @@
         }
         
         textarea.form-control {
-            min-height: 100px;
+            min-height: 120px;
             resize: vertical;
         }
         
-        .file-input {
-            padding: 10px 18px;
+        .row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
         }
         
-        .file-input::-webkit-file-upload-button {
-            background: rgba(0, 194, 255, 0.2);
-            border: none;
-            border-radius: 40px;
-            padding: 6px 16px;
-            color: white;
-            margin-right: 12px;
-            cursor: pointer;
+        .col-half {
+            flex: 1;
+            min-width: 180px;
+        }
+        
+        .btn-group-actions {
+            display: flex;
+            gap: 16px;
+            margin-top: 2rem;
+            flex-wrap: wrap;
         }
         
         .btn-submit {
@@ -348,8 +342,6 @@
             cursor: pointer;
             transition: 0.2s;
             font-size: 0.9rem;
-            width: 100%;
-            justify-content: center;
         }
         
         .btn-submit:hover {
@@ -360,7 +352,7 @@
         .btn-cancel {
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.15);
-            padding: 10px 24px;
+            padding: 12px 28px;
             border-radius: 40px;
             color: var(--text-secondary);
             text-decoration: none;
@@ -369,15 +361,23 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            margin-top: 1rem;
-            width: 100%;
-            justify-content: center;
         }
         
         .btn-cancel:hover {
             background: rgba(255, 77, 77, 0.2);
             color: white;
             border-color: #ff4d4d;
+        }
+        
+        .flash-message {
+            background: rgba(255, 51, 102, 0.2);
+            border: 1px solid rgba(255, 51, 102, 0.4);
+            backdrop-filter: blur(8px);
+            border-radius: 28px;
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 500;
         }
         
         @media (max-width: 900px) {
@@ -409,6 +409,10 @@
             .glass-card {
                 padding: 1.2rem;
             }
+            .row {
+                flex-direction: column;
+                gap: 0;
+            }
         }
         
          ::-webkit-scrollbar {
@@ -428,12 +432,12 @@
 
 <body>
 
-    <!-- SIDEBAR - consistent -->
+    <!-- SIDEBAR (full, consistent with all GRC pages) -->
     <div class="sidebar">
         <div class="sidebar-header">
             <h3><i class="fas fa-shield-haltered"></i> S I E M <span style="font-weight:500">SOC</span></h3>
             <div class="agent">
-                <i class="fas fa-brain" style="color:#00c6ff; font-size: 1.8rem;"></i>
+                <i class="fas fa-brain" style="color:#00c6ff; font-size:1.8rem;"></i>
                 <div style="flex:1">
                     <div style="font-size:0.85rem; font-weight:600">AI Defense Agent</div>
                     <div style="font-size:0.7rem; display:flex; align-items:center; gap:4px; color:var(--text-secondary)">
@@ -442,7 +446,6 @@
                 </div>
             </div>
         </div>
-
         <ul class="nav-menu">
             <li><a class="nav-link" href="{{ url_for('dashboard') }}"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
             <li><a class="nav-link" href="{{ url_for('view_logs') }}"><i class="fas fa-database"></i> <span>Logs</span></a></li>
@@ -450,8 +453,10 @@
             <li><a class="nav-link" href="{{ url_for('devices') }}"><i class="fas fa-microchip"></i> <span>Devices</span></a></li>
             <li><a class="nav-link" href="{{ url_for('network_connections') }}"><i class="fas fa-chart-line"></i> <span>Network</span></a></li>
             <li><a class="nav-link" href="/sniffer"><i class="fas fa-eye"></i> <span>Live Sniffer</span></a></li>
-
-            <li><a class="nav-link" href="{{ url_for('grc_risks') }}"><i class="fas fa-exclamation-triangle"></i> <span>Risks</span></a></li>
+            <li><a class="nav-link" href="/upload_logs"><i class="fas fa-cloud-upload-alt"></i> <span>Upload Logs</span></a></li>
+            <li><a class="nav-link" href="{{ url_for('submit_log_form') }}"><i class="fas fa-pen-alt"></i> <span>Manual Log</span></a></li>
+            <li><a class="nav-link" href="{{ url_for('network_devices') }}"><i class="fas fa-network-wired"></i> <span>Network Devices</span></a></li>
+            <li><a class="nav-link" href="{{ url_for('admin_users') }}"><i class="fas fa-users-gear"></i> <span>Users</span></a></li>
             <li><a class="nav-link" href="{{ url_for('grc_dashboard') }}"><i class="fas fa-balance-scale"></i> <span>GRC</span></a></li>
             <li><a class="nav-link" href="{{ url_for('grc_risks') }}"><i class="fas fa-exclamation-triangle"></i> <span>Risks</span></a></li>
             <li><a class="nav-link" href="{{ url_for('grc_policies') }}"><i class="fas fa-file-alt"></i> <span>Policies</span></a></li>
@@ -459,9 +464,8 @@
             <li><a class="nav-link" href="{{ url_for('grc_incidents') }}"><i class="fas fa-bug"></i> <span>Incidents</span></a></li>
             <li><a class="nav-link" href="{{ url_for('grc_bcp') }}"><i class="fas fa-database"></i> <span>BCP/DRP</span></a></li>
             <li><a class="nav-link" href="{{ url_for('grc_kpi') }}"><i class="fas fa-chart-simple"></i> <span>KPI</span></a></li>
-            <li><a class="nav-link" href="{{ url_for('admin_users') }}"><i class="fas fa-users-gear"></i> <span>Users</span></a></li>
         </ul>
-        <div style="font-size: 0.65rem; text-align: center; margin-top: 20px; color: #3e5a77;">
+        <div style="font-size:0.65rem; text-align:center; margin-top:20px; color:#3e5a77;">
             <i class="fas fa-shield-virus"></i> Zero Trust Ready
         </div>
     </div>
@@ -470,7 +474,7 @@
     <div class="main-content">
         <div class="topbar">
             <div class="page-title">
-                <i class="fas fa-cloud-upload-alt"></i> Submit Analysis Request
+                <i class="fas fa-exclamation-triangle"></i> {{ 'Edit Risk' if risk else 'Create New Risk' }}
             </div>
             <div class="right-top-actions">
                 <a class="action-btn" href="{{ url_for('report') }}"><i class="fas fa-file-pdf"></i> Report</a>
@@ -478,55 +482,77 @@
             </div>
         </div>
 
-        <!-- GLASS FORM CARD -->
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %} {% if messages %} {% for category, message in messages %}
+        <div class="flash-message"><i class="fas fa-info-circle"></i> {{ message }}</div>
+        {% endfor %} {% endif %} {% endwith %}
+
         <div class="glass-card">
             <div class="section-header">
-                <i class="fas fa-file-upload" style="color: var(--cyber-cyan);"></i>
-                <span>New Log Analysis Request</span>
+                <i class="fas fa-clipboard-list" style="color: var(--cyber-cyan);"></i>
+                <span>Risk Details</span>
             </div>
 
-            <form method="POST" enctype="multipart/form-data" action="/manager/request">
+            <form method="POST">
                 <div class="form-group">
-                    <div class="form-label"><i class="fas fa-file"></i> Log File (.log, .txt, .csv)</div>
-                    <input type="file" name="file" class="form-control file-input" accept=".log,.txt,.csv" required>
-                    <div style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 5px;">Maximum file size: 10MB (adjust if needed)</div>
+                    <div class="form-label"><i class="fas fa-heading"></i> Risk Title</div>
+                    <input type="text" name="title" class="form-control" value="{{ risk.title if risk else '' }}" placeholder="e.g., Data Breach via Unpatched Systems" required>
                 </div>
-
                 <div class="form-group">
-                    <div class="form-label"><i class="fas fa-align-left"></i> Description (optional)</div>
-                    <textarea name="description" class="form-control" placeholder="Add any context or notes about this log file..."></textarea>
+                    <div class="form-label"><i class="fas fa-align-left"></i> Description</div>
+                    <textarea name="description" class="form-control" rows="4" required>{{ risk.description if risk else '' }}</textarea>
                 </div>
-
-                <button type="submit" class="btn-submit">
-                    <i class="fas fa-paper-plane"></i> Submit Request
-                </button>
-
-                <a href="{{ url_for('manager_requests') }}" class="btn-cancel">
-                    <i class="fas fa-times"></i> Cancel
-                </a>
+                <div class="form-group">
+                    <div class="form-label"><i class="fas fa-tag"></i> Category</div>
+                    <input type="text" name="category" class="form-control" value="{{ risk.category if risk else '' }}" placeholder="e.g., Cybersecurity, Operational, Compliance">
+                </div>
+                <div class="row">
+                    <div class="col-half">
+                        <div class="form-group">
+                            <div class="form-label"><i class="fas fa-dice-d6"></i> Likelihood (1-5)</div>
+                            <input type="number" name="likelihood" class="form-control" min="1" max="5" value="{{ risk.likelihood if risk else 3 }}" required>
+                        </div>
+                    </div>
+                    <div class="col-half">
+                        <div class="form-group">
+                            <div class="form-label"><i class="fas fa-bullseye"></i> Impact (1-5)</div>
+                            <input type="number" name="impact" class="form-control" min="1" max="5" value="{{ risk.impact if risk else 3 }}" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="form-label"><i class="fas fa-chart-line"></i> Risk Response</div>
+                    <input type="text" name="risk_response" class="form-control" value="{{ risk.risk_response if risk else '' }}" placeholder="e.g., Apply security controls, transfer via insurance">
+                </div>
+                <div class="form-group">
+                    <div class="form-label"><i class="fas fa-user-tie"></i> Owner</div>
+                    <input type="text" name="owner" class="form-control" value="{{ risk.owner if risk else '' }}" placeholder="Department or responsible person">
+                </div>
+                <div class="form-group">
+                    <div class="form-label"><i class="fas fa-chart-simple"></i> Status</div>
+                    <select name="status" class="form-select">
+                        <option value="Open" {% if risk and risk.status == 'Open' %}selected{% endif %}>Open (مفتوح)</option>
+                        <option value="In Progress" {% if risk and risk.status == 'In Progress' %}selected{% endif %}>In Progress (قيد المعالجة)</option>
+                        <option value="Closed" {% if risk and risk.status == 'Closed' %}selected{% endif %}>Closed (مغلق)</option>
+                    </select>
+                </div>
+                <div class="btn-group-actions">
+                    <button type="submit" class="btn-submit"><i class="fas fa-save"></i> Save Risk</button>
+                    <a href="{{ url_for('grc_risks') }}" class="btn-cancel"><i class="fas fa-times"></i> Cancel</a>
+                </div>
             </form>
         </div>
 
-        <!-- Info footer -->
         <div style="margin-top: 32px; padding: 16px 0; border-top: 1px solid rgba(0,194,255,0.1); display: flex; justify-content: space-between; font-size: 0.7rem; flex-wrap: wrap;">
-            <div><i class="fas fa-chart-line"></i> Submitted logs will be analyzed by SOC admin</div>
-            <div><i class="fas fa-shield-alt"></i> You will be notified when the report is ready</div>
+            <div><i class="fas fa-chart-line"></i> Risk score = Likelihood × Impact (auto-calculated)</div>
+            <div><i class="fas fa-shield-alt"></i> Integrated with risk treatment plans</div>
         </div>
     </div>
 
-    <!-- Optional: simple client-side validation -->
     <script>
-        // Ensure file is selected before submit
-        const form = document.querySelector('form');
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                const fileInput = document.querySelector('input[type="file"]');
-                if (fileInput && fileInput.files.length === 0) {
-                    e.preventDefault();
-                    alert('Please select a log file to upload.');
-                }
-            });
-        }
+        document.querySelectorAll('.glass-card, .stat-card, .card').forEach(card => {
+            card.addEventListener('mouseenter', () => card.style.transition = 'all 0.2s ease');
+        });
     </script>
 </body>
 

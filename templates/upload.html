@@ -1,101 +1,521 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <title>رفع ملفات السجلات</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>SIEM SOC | Upload & Analyze Logs</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        body {
-            background: #0a0e14;
-            font-family: 'Inter', sans-serif;
-            color: #eef2ff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+        * {
             margin: 0;
-            padding: 2rem;
+            padding: 0;
+            box-sizing: border-box;
         }
         
-        .card {
-            background: #11161f;
-            border-radius: 32px;
-            padding: 2rem;
-            max-width: 600px;
+         :root {
+            --bg-deep: #03070f;
+            --bg-surface: rgba(12, 22, 40, 0.65);
+            --glass-border: rgba(56, 189, 248, 0.25);
+            --glass-highlight: rgba(56, 189, 248, 0.1);
+            --primary-glow: #00c6ff;
+            --primary-accent: #3b82f6;
+            --cyber-cyan: #00f2fe;
+            --danger-neon: #ff3366;
+            --warning-neon: #ffb347;
+            --success-neon: #2ecc71;
+            --text-primary: #f0f4ff;
+            --text-secondary: #9bb4d4;
+            --border-dim: rgba(72, 187, 255, 0.18);
+            --card-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(0, 194, 255, 0.08);
+            --input-bg: rgba(12, 25, 45, 0.7);
+        }
+        
+        body {
+            background: radial-gradient(ellipse at 20% 30%, #0a0f1f, #02060c);
+            font-family: 'Inter', sans-serif;
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            border: 1px solid #2e3a48;
-            box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.5);
+            height: 100%;
+            background-image: linear-gradient(rgba(0, 194, 255, 0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 194, 255, 0.02) 1px, transparent 1px);
+            background-size: 45px 45px;
+            pointer-events: none;
+            z-index: 0;
+        }
+        /* SIDEBAR (glass, left aligned) */
+        
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: rgba(6, 14, 26, 0.75);
+            backdrop-filter: blur(16px);
+            border-right: 1px solid var(--glass-border);
+            z-index: 100;
+            padding: 1.2rem 0.8rem;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.25s ease;
+            box-shadow: 12px 0 32px -12px rgba(0, 0, 0, 0.5);
+            overflow-y: auto;
+        }
+        
+        .sidebar-header {
+            text-align: center;
+            margin-bottom: 1.8rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(0, 198, 255, 0.2);
+        }
+        
+        .sidebar-header h3 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff, var(--cyber-cyan), var(--primary-accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .agent {
+            background: linear-gradient(95deg, rgba(0, 194, 255, 0.12), rgba(59, 130, 246, 0.08));
+            border-radius: 20px;
+            padding: 12px 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 14px;
+            border: 1px solid rgba(0, 194, 255, 0.2);
+            backdrop-filter: blur(4px);
+        }
+        
+        .agent i {
+            font-size: 1.8rem;
+            filter: drop-shadow(0 0 5px var(--primary-glow));
+        }
+        
+        .agent-status {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #2ecc71;
+            border-radius: 50%;
+            box-shadow: 0 0 6px #2ecc71;
+            animation: pulse-green 1.5s infinite;
+            margin-right: 6px;
+        }
+        
+        @keyframes pulse-green {
+            0% {
+                opacity: 0.4;
+                transform: scale(0.8);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+        
+        .nav-menu {
+            list-style: none;
+            flex: 1;
+            margin-top: 1rem;
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 16px;
+            border-radius: 14px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            margin-bottom: 6px;
+        }
+        
+        .nav-link i {
+            width: 22px;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+        
+        .nav-link:hover {
+            background: rgba(0, 194, 255, 0.2);
+            color: white;
+            transform: translateX(6px);
+            border-left: 2px solid var(--cyber-cyan);
+        }
+        
+        .nav-link.active {
+            background: linear-gradient(90deg, rgba(0, 194, 255, 0.2), rgba(0, 150, 255, 0.05));
+            color: white;
+            border-left: 3px solid var(--cyber-cyan);
+            box-shadow: 0 2px 8px rgba(0, 194, 255, 0.2);
+        }
+        /* MAIN CONTENT */
+        
+        .main-content {
+            margin-left: 280px;
+            padding: 24px 32px;
+            position: relative;
+            z-index: 2;
+        }
+        /* TOPBAR */
+        
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(8, 18, 32, 0.55);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-dim);
+            border-radius: 28px;
+            padding: 12px 24px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        
+        .page-title {
+            font-weight: 800;
+            font-size: 1.5rem;
+            background: linear-gradient(125deg, #FFF, var(--cyber-cyan), #7aa2f7);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
+        }
+        
+        .right-top-actions {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .action-btn {
+            background: rgba(0, 194, 255, 0.12);
+            border: 1px solid var(--glass-border);
+            padding: 8px 18px;
+            border-radius: 32px;
+            color: white;
+            font-weight: 500;
+            text-decoration: none;
+            transition: 0.2s;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .action-btn:hover {
+            background: var(--primary-accent);
+            border-color: var(--cyber-cyan);
+            box-shadow: 0 0 10px rgba(0, 194, 255, 0.3);
+        }
+        
+        .logout-btn {
+            background: rgba(255, 77, 77, 0.15);
+            border-color: rgba(255, 77, 77, 0.4);
+        }
+        
+        .logout-btn:hover {
+            background: #ff4d4d;
+            border-color: #ff9999;
+            box-shadow: 0 0 12px rgba(255, 77, 77, 0.5);
+        }
+        /* GLASS UPLOAD CARD */
+        
+        .glass-card {
+            background: rgba(10, 18, 32, 0.65);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-dim);
+            border-radius: 28px;
+            padding: 2rem;
+            transition: all 0.2s;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .glass-card:hover {
+            border-color: rgba(0, 194, 255, 0.35);
+            box-shadow: 0 12px 28px -12px rgba(0, 194, 255, 0.2);
         }
         
         .card-header {
-            font-size: 1.6rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
             display: flex;
             align-items: center;
-            gap: 0.7rem;
-        }
-        
-        .alert {
-            background: #0f2b1f;
-            border-right: 4px solid #2ecc71;
-            padding: 1rem;
-            border-radius: 20px;
+            gap: 12px;
+            font-size: 1.4rem;
+            font-weight: 700;
             margin-bottom: 1.5rem;
+            border-left: 4px solid var(--cyber-cyan);
+            padding-left: 16px;
+        }
+        /* Stats alert box */
+        
+        .stats-alert {
+            background: rgba(0, 194, 255, 0.08);
+            border: 1px solid rgba(0, 194, 255, 0.25);
+            border-radius: 24px;
+            padding: 1.2rem;
+            margin-bottom: 1.8rem;
         }
         
-        input[type="file"] {
-            background: #1a212c;
-            padding: 0.8rem;
-            border-radius: 40px;
-            width: 100%;
-            border: 1px solid #2e3a48;
-            color: white;
+        .stats-alert i {
+            color: var(--cyber-cyan);
+            margin-right: 8px;
         }
         
-        button {
-            background: #0f6bff;
-            width: 100%;
-            padding: 0.8rem;
+        .stats-alert hr {
+            border-color: rgba(0, 194, 255, 0.2);
+            margin: 0.8rem 0;
+        }
+        
+        .stats-alert ul {
+            margin-top: 0.5rem;
+            padding-left: 1.2rem;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+        
+        .stats-alert li {
+            margin-bottom: 4px;
+        }
+        /* Form styles */
+        
+        .file-input {
+            background: var(--input-bg);
+            border: 1px solid rgba(0, 194, 255, 0.25);
             border-radius: 40px;
-            font-weight: bold;
+            padding: 12px 18px;
+            width: 100%;
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        
+        .file-input::-webkit-file-upload-button {
+            background: rgba(0, 194, 255, 0.2);
             border: none;
+            border-radius: 40px;
+            padding: 6px 16px;
             color: white;
-            margin-top: 1rem;
-            font-size: 1rem;
+            margin-right: 12px;
             cursor: pointer;
         }
         
-        .stats {
-            background: #0b0f17;
-            border-radius: 24px;
-            padding: 1rem;
-            margin-top: 1rem;
+        .file-input:focus {
+            outline: none;
+            border-color: var(--cyber-cyan);
+        }
+        
+        .btn-upload {
+            background: linear-gradient(95deg, #0f6bff, #00c6ff);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 40px;
+            color: white;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.9rem;
+            width: 100%;
+            justify-content: center;
+            margin-top: 1.2rem;
+        }
+        
+        .btn-upload:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 18px rgba(0, 194, 255, 0.3);
+        }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 1.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: 0.2s;
+        }
+        
+        .back-link:hover {
+            color: var(--cyber-cyan);
+            transform: translateX(-4px);
+        }
+        
+        @media (max-width: 900px) {
+            .sidebar {
+                width: 70px;
+                padding: 1rem 0.4rem;
+            }
+            .sidebar-header h3,
+            .agent div,
+            .nav-link span:not(i) {
+                display: none;
+            }
+            .sidebar-header h3::before {
+                content: "⚡";
+                font-size: 1.6rem;
+                display: block;
+            }
+            .nav-link i {
+                font-size: 1.3rem;
+                margin: 0 auto;
+            }
+            .nav-link {
+                justify-content: center;
+            }
+            .main-content {
+                margin-left: 70px;
+                padding: 16px;
+            }
+            .glass-card {
+                padding: 1.2rem;
+            }
+        }
+        
+         ::-webkit-scrollbar {
+            width: 5px;
+        }
+        
+         ::-webkit-scrollbar-track {
+            background: #0a1020;
+        }
+        
+         ::-webkit-scrollbar-thumb {
+            background: var(--primary-glow);
+            border-radius: 10px;
         }
     </style>
 </head>
 
 <body>
-    <div class="card">
-        <div class="card-header"><i class="fas fa-cloud-upload-alt"></i> 📂 رفع وتحليل السجلات</div>
-        {% if stats %}
-        <div class="alert">
-            <i class="fas fa-check-circle"></i> تمت معالجة <strong>{{ stats.total_lines }}</strong> سطر من <strong>{{ stats.filename }}</strong><br> ✅ نجاح: {{ stats.success }} | ❌ فشل: {{ stats.failed }} | 🚨 تنبيهات: {{ stats.alerts }} {% if stats.paths
-            %}
-            <hr>
-            <div><small>المسارات الأكثر طلباً:</small>
-                <ul>{% for path,count in stats.paths.items() %}
-                    <li>{{ path }} ({{ count }})</li>{% endfor %}</ul>{% endif %}
+
+    <!-- SIDEBAR - consistent with all SOC pages -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h3><i class="fas fa-shield-haltered"></i> S I E M <span style="font-weight:500">SOC</span></h3>
+            <div class="agent">
+                <i class="fas fa-brain" style="color:#00c6ff; font-size: 1.8rem;"></i>
+                <div style="flex:1">
+                    <div style="font-size:0.85rem; font-weight:600">AI Defense Agent</div>
+                    <div style="font-size:0.7rem; display:flex; align-items:center; gap:4px; color:var(--text-secondary)">
+                        <span class="agent-status"></span> <span>active · real-time</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <ul class="nav-menu">
+            <li><a class="nav-link" href="{{ url_for('dashboard') }}"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+            <li><a class="nav-link" href="{{ url_for('view_logs') }}"><i class="fas fa-database"></i> <span>Logs</span></a></li>
+            <li><a class="nav-link" href="{{ url_for('view_alerts') }}"><i class="fas fa-bell"></i> <span>Alerts</span></a></li>
+            <li><a class="nav-link" href="{{ url_for('devices') }}"><i class="fas fa-microchip"></i> <span>Devices</span></a></li>
+            <li><a class="nav-link" href="{{ url_for('network_connections') }}"><i class="fas fa-chart-line"></i> <span>Network</span></a></li>
+            <li><a class="nav-link" href="/sniffer"><i class="fas fa-eye"></i> <span>Live Sniffer</span></a></li>
+            <li><a class="nav-link active" href="/upload_logs"><i class="fas fa-cloud-upload-alt"></i> <span>Upload Logs</span></a></li>
+            <!-- <li><a class="nav-link" href="{{ url_for('grc_dashboard') }}"><i class="fas fa-balance-scale"></i> <span>GRC</span></a></li>
+            <li><a class="nav-link" href="{{ url_for('grc_risks') }}"><i class="fas fa-exclamation-triangle"></i> <span>Risks</span></a></li>
+            <li><a class="nav-link" href="{{ url_for('grc_policies') }}"><i class="fas fa-file-alt"></i> <span>Policies</span></a></li>
+            <li><a class="nav-link" href="{{ url_for('grc_compliance') }}"><i class="fas fa-check-double"></i> <span>Compliance</span></a></li>
+            <li><a class="nav-link" href="{{ url_for('grc_incidents') }}"><i class="fas fa-bug"></i> <span>Incidents</span></a></li>
+            <li><a class="nav-link" href="{{ url_for('grc_bcp') }}"><i class="fas fa-database"></i> <span>BCP/DRP</span></a></li>
+            <li><a class="nav-link" href="{{ url_for('grc_kpi') }}"><i class="fas fa-chart-simple"></i> <span>KPI</span></a></li>
+            <li><a class="nav-link" href="{{ url_for('admin_users') }}"><i class="fas fa-users-gear"></i> <span>Users</span></a></li> -->
+        </ul>
+        <div style="font-size: 0.65rem; text-align: center; margin-top: 20px; color: #3e5a77;">
+            <i class="fas fa-shield-virus"></i> Zero Trust Ready
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        <div class="topbar">
+            <div class="page-title">
+                <i class="fas fa-cloud-upload-alt"></i> Log Ingestion & Analysis
+            </div>
+            <div class="right-top-actions">
+                <a class="action-btn" href="{{ url_for('report') }}"><i class="fas fa-file-pdf"></i> Report</a>
+                <a class="action-btn logout-btn" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </div>
+
+        <!-- Main Upload Card -->
+        <div class="glass-card">
+            <div class="card-header">
+                <i class="fas fa-file-upload" style="color: var(--cyber-cyan);"></i>
+                <span>Upload & Analyze Log Files</span>
+            </div>
+
+            <!-- Stats display (if present after upload) -->
+            {% if stats %}
+            <div class="stats-alert">
+                <i class="fas fa-chart-line"></i> <strong>Analysis complete</strong> — processed <strong>{{ stats.total_lines }}</strong> lines from <strong>{{ stats.filename }}</strong><br>
+                <span style="color: var(--success-neon);"><i class="fas fa-check-circle"></i> Success: {{ stats.success }}</span> &nbsp;|&nbsp;
+                <span style="color: var(--danger-neon);"><i class="fas fa-exclamation-triangle"></i> Failed: {{ stats.failed }}</span> &nbsp;|&nbsp;
+                <span style="color: var(--warning-neon);"><i class="fas fa-bell"></i> Alerts: {{ stats.alerts }}</span> {% if stats.paths %}
+                <hr>
+                <div><i class="fas fa-link"></i> <strong>Most requested paths:</strong></div>
+                <ul>
+                    {% for path, count in stats.paths.items() %}
+                    <li><code>{{ path }}</code> ({{ count }} hits)</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
             </div>
             {% endif %}
+
+            <!-- Upload Form -->
             <form method="POST" enctype="multipart/form-data">
-                <input type="file" name="file" accept=".log,.txt,.csv" required>
-                <button type="submit"><i class="fas fa-chart-line"></i> رفع وتحليل</button>
+                <input type="file" name="file" class="file-input" accept=".log,.txt,.csv" required>
+                <button type="submit" class="btn-upload">
+                    <i class="fas fa-chart-line"></i> Upload & Analyze
+                </button>
             </form>
-            <div style="margin-top: 1.5rem; text-align: center;"><a href="/" style="color:#80b7ff;">← العودة للوحة التحكم</a></div>
+
+            <!-- Back to Dashboard Link -->
+            <div style="text-align: center; margin-top: 1.8rem;">
+                <a href="{{ url_for('dashboard') }}" class="back-link">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
         </div>
+
+        <!-- Footer info -->
+        <div style="margin-top: 48px; padding: 16px 0; border-top: 1px solid rgba(0,194,255,0.1); display: flex; justify-content: space-between; font-size: 0.7rem; flex-wrap: wrap;">
+            <div><i class="fas fa-chart-line"></i> Supported formats: .log, .txt, .csv (common logs)</div>
+            <div><i class="fas fa-shield-alt"></i> Automatic parsing & threat detection</div>
+        </div>
+    </div>
+
 </body>
 
 </html>

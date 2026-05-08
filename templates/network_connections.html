@@ -1,268 +1,89 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html>
 
 <head>
-    <meta charset="UTF-8">
-    <title>اتصالات الشبكة</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>Network Connections</title>
     <style>
         body {
-            background: #0a0e14;
-            font-family: 'Inter', sans-serif;
-            padding: 2rem;
-            direction: rtl;
-            color: #eef2ff;
+            font-family: Arial;
+            margin: 0;
+            background: #f4f7fc;
+        }
+        
+        .navbar {
+            background: #1e2a3a;
+            color: white;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .navbar a {
+            color: white;
+            margin-left: 20px;
+            text-decoration: none;
         }
         
         .container {
-            max-width: 1400px;
-            margin: auto;
-        }
-        
-        h1 {
-            margin-bottom: 1rem;
-        }
-        
-        .agent-panel {
-            background: #11161f;
-            border-radius: 28px;
-            padding: 1rem 1.5rem;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-            flex-wrap: wrap;
-            border: 1px solid #2a3240;
-        }
-        
-        .agent-status {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: #1a212c;
-            padding: 0.4rem 1rem;
-            border-radius: 40px;
-        }
-        
-        .status-led {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #6c757d;
-        }
-        
-        .status-led.active {
-            background: #2ecc71;
-            box-shadow: 0 0 5px #2ecc71;
-        }
-        
-        button {
-            background: #0f6bff;
-            border: none;
-            padding: 0.5rem 1.2rem;
-            border-radius: 40px;
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        
-        button.stop-btn {
-            background: #b91c1c;
-        }
-        
-        button.start-btn {
-            background: #0f6bff;
-        }
-        
-        button:hover {
-            filter: brightness(1.05);
-            transform: translateY(-1px);
-        }
-        
-        .filter-form {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-            flex-wrap: wrap;
-        }
-        
-        .filter-form input,
-        .filter-form select {
-            background: #1a212c;
-            border: 1px solid #2e3a48;
-            padding: 0.5rem 1rem;
-            border-radius: 40px;
-            color: white;
-        }
-        
-        .filter-form button {
-            background: #0f6bff;
-            border: none;
-            padding: 0.5rem 1.5rem;
-            border-radius: 40px;
-            color: white;
-            cursor: pointer;
+            padding: 2rem;
         }
         
         table {
             width: 100%;
-            background: #0f131c;
-            border-radius: 24px;
-            overflow: hidden;
             border-collapse: collapse;
+            background: white;
         }
         
         th,
         td {
-            padding: 0.8rem;
-            text-align: right;
-            border-bottom: 1px solid #1f2a3a;
+            padding: 8px;
+            border: 1px solid #ddd;
+            text-align: left;
         }
         
         th {
-            background: #0b0f17;
-            color: #80b7ff;
-        }
-        
-        code {
-            background: #1e2a3a;
-            padding: 0.2rem 0.5rem;
-            border-radius: 12px;
+            background: #eef2f5;
         }
         
         .pagination {
-            display: flex;
-            justify-content: center;
-            gap: 0.5rem;
-            margin-top: 2rem;
-        }
-        
-        .pagination a {
-            background: #1a212c;
-            padding: 0.5rem 1rem;
-            border-radius: 40px;
-            text-decoration: none;
-            color: white;
-        }
-        
-        .active a {
-            background: #0f6bff;
-        }
-        
-        .small-note {
-            font-size: 0.8rem;
-            color: #9aaebf;
-            margin-right: auto;
+            margin-top: 1rem;
+            text-align: center;
         }
     </style>
 </head>
 
 <body>
+    <div class="navbar">
+        <span>🛡️ SIEM - Network Monitor</span>
+        <div><a href="/">Dashboard</a><a href="/network_connections">Connections</a><a href="/alerts">Alerts</a><a href="/logs">Logs</a><a href="/logout">Logout</a></div>
+    </div>
     <div class="container">
-        <h1><i class="fas fa-exchange-alt"></i> اتصالات الشبكة (من Agent)</h1>
-        <div class="agent-panel">
-            <div class="agent-status">
-                <span class="status-led" id="agentLed"></span>
-                <span id="agentStatusText">غير نشط</span>
-            </div>
-            <button id="startAgentBtn" class="start-btn"><i class="fas fa-play"></i> تشغيل الـ Agent</button>
-            <button id="stopAgentBtn" class="stop-btn"><i class="fas fa-stop"></i> إيقاف الـ Agent</button>
-            <span class="small-note"><i class="fas fa-info-circle"></i> الـ Agent يجمع إحصائيات الاتصالات من الـ Sniffer ويحفظها كل 30 ثانية. تأكد من تشغيل Sniffer أولاً.</span>
-        </div>
-        <form method="GET" class="filter-form">
-            <input name="src_ip" placeholder="IP المصدر" value="{{ src_ip }}">
-            <input name="dst_ip" placeholder="IP الوجهة" value="{{ dst_ip }}">
-            <select name="protocol">
-            <option value="">الكل</option>
-            <option {% if protocol=='TCP' %}selected{% endif %}>TCP</option>
-            <option {% if protocol=='UDP' %}selected{% endif %}>UDP</option>
-            <option {% if protocol=='ICMP' %}selected{% endif %}>ICMP</option>
-        </select>
-            <button type="submit"><i class="fas fa-search"></i> فلترة</button>
-        </form>
-        <div style="overflow-x:auto;">
-            <table>
-                <thead>
-                    <tr>
-                        <th>التوقيت</th>
-                        <th>المصدر:المنفذ</th>
-                        <th>→</th>
-                        <th>الوجهة:المنفذ</th>
-                        <th>البروتوكول</th>
-                        <th>الباكيتات</th>
-                        <th>الحجم (بايت)</th>
-                        <th>الوكيل</th>
-                    </tr>
-                </thead>
-                <tbody>{% for conn in connections.items %}
-                    <td>{{ conn.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
-                    <td><code>{{ conn.src_ip }}</code>:{{ conn.src_port or '*' }}</td>
-                    <td>→</td>
-                    <td><code>{{ conn.dst_ip }}</code>:{{ conn.dst_port or '*' }}</td>
-                    <td>{{ conn.protocol }}</td>
-                    <td>{{ conn.packets_count }}</td>
-                    <td>{{ conn.bytes_total }}</td>
-                    <td>{{ conn.agent_id }}</td>
-                    </tr>{% else %}
-                    <td colspan="8">لا توجد اتصالات بعد. قم بتشغيل Sniffer و Agent أولاً.</td>
-                    </tr>{% endfor %}</tbody>
-            </table>
-        </div>
+        <h2>📡 Captured Network Connections</h2>
+        <table>
+            <tr>
+                <th>Time</th>
+                <th>Source IP</th>
+                <th>Dest IP</th>
+                <th>Protocol</th>
+                <th>Packets</th>
+                <th>Bytes</th>
+            </tr>
+            {% for conn in connections.items %}
+            <tr>
+                <td>{{ conn.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                <td>{{ conn.src_ip }}{% if conn.src_port %}:{{ conn.src_port }}{% endif %}</td>
+                <td>{{ conn.dst_ip }}{% if conn.dst_port %}:{{ conn.dst_port }}{% endif %}</td>
+                <td>{{ conn.protocol }}</td>
+                <td>{{ conn.packets_count }}</td>
+                <td>{{ conn.bytes_total }}</td>
+            </tr>
+            {% endfor %}
+        </table>
         <div class="pagination">
-            {% if connections.has_prev %}<a href="{{ url_for('network_connections', page=connections.prev_num, src_ip=src_ip, dst_ip=dst_ip, protocol=protocol) }}">السابق</a>{% endif %} {% for p in connections.iter_pages() %}{% if p %}<a href="{{ url_for('network_connections', page=p, src_ip=src_ip, dst_ip=dst_ip, protocol=protocol) }}"
-                class="{% if p==connections.page %}active{% endif %}">{{ p }}</a>{% endif %}{% endfor %} {% if connections.has_next %}<a href="{{ url_for('network_connections', page=connections.next_num, src_ip=src_ip, dst_ip=dst_ip, protocol=protocol) }}">التالي</a>{%
-            endif %}
+            {% if connections.has_prev %}<a href="?page={{ connections.prev_num }}">Previous</a>{% endif %} Page {{ connections.page }} of {{ connections.pages }} {% if connections.has_next %}<a href="?page={{ connections.next_num }}">Next</a>{% endif
+            %}
         </div>
     </div>
-    <script>
-        async function updateAgentStatus() {
-            try {
-                const response = await fetch('/agent_status');
-                const data = await response.json();
-                const led = document.getElementById('agentLed');
-                const text = document.getElementById('agentStatusText');
-                if (data.active) {
-                    led.classList.add('active');
-                    text.innerText = 'يعمل الآن';
-                } else {
-                    led.classList.remove('active');
-                    text.innerText = 'متوقف';
-                }
-            } catch (e) {
-                console.error(e);
-            }
-        }
-        async function startAgent() {
-            const res = await fetch('/start_agent', {
-                method: 'POST'
-            });
-            if (res.ok) {
-                alert('✅ تم تشغيل الـ Agent');
-                updateAgentStatus();
-            } else {
-                const d = await res.json();
-                alert('❌ ' + d.status);
-            }
-        }
-        async function stopAgent() {
-            const res = await fetch('/stop_agent', {
-                method: 'POST'
-            });
-            if (res.ok) {
-                alert('⏹️ تم إيقاف الـ Agent');
-                updateAgentStatus();
-            } else {
-                const d = await res.json();
-                alert('❌ ' + d.status);
-            }
-        }
-        document.getElementById('startAgentBtn').onclick = startAgent;
-        document.getElementById('stopAgentBtn').onclick = stopAgent;
-        updateAgentStatus();
-        setInterval(updateAgentStatus, 5000);
-    </script>
 </body>
 
 </html>

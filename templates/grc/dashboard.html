@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>SIEM SOC | Submit Analysis Request</title>
+    <title>SIEM SOC | GRC Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -18,7 +18,6 @@
             --bg-deep: #03070f;
             --bg-surface: rgba(12, 22, 40, 0.65);
             --glass-border: rgba(56, 189, 248, 0.25);
-            --glass-highlight: rgba(56, 189, 248, 0.1);
             --primary-glow: #00c6ff;
             --primary-accent: #3b82f6;
             --cyber-cyan: #00f2fe;
@@ -29,7 +28,6 @@
             --text-secondary: #9bb4d4;
             --border-dim: rgba(72, 187, 255, 0.18);
             --card-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(0, 194, 255, 0.08);
-            --input-bg: rgba(12, 25, 45, 0.7);
         }
         
         body {
@@ -37,7 +35,6 @@
             font-family: 'Inter', sans-serif;
             color: var(--text-primary);
             min-height: 100vh;
-            overflow-x: hidden;
             position: relative;
         }
         
@@ -53,7 +50,6 @@
             pointer-events: none;
             z-index: 0;
         }
-        /* SIDEBAR (glass) */
         
         .sidebar {
             position: fixed;
@@ -68,7 +64,7 @@
             padding: 1.2rem 0.8rem;
             display: flex;
             flex-direction: column;
-            transition: all 0.25s ease;
+            transition: 0.25s;
             box-shadow: 12px 0 32px -12px rgba(0, 0, 0, 0.5);
             overflow-y: auto;
         }
@@ -83,26 +79,20 @@
         .sidebar-header h3 {
             font-size: 1.75rem;
             font-weight: 800;
-            background: linear-gradient(135deg, #ffffff, var(--cyber-cyan), var(--primary-accent));
+            background: linear-gradient(135deg, #fff, var(--cyber-cyan), var(--primary-accent));
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            letter-spacing: -0.3px;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
         }
         
         .agent {
             background: linear-gradient(95deg, rgba(0, 194, 255, 0.12), rgba(59, 130, 246, 0.08));
             border-radius: 20px;
-            padding: 12px 12px;
+            padding: 12px;
             display: flex;
-            align-items: center;
             gap: 12px;
             margin-top: 14px;
             border: 1px solid rgba(0, 194, 255, 0.2);
-            backdrop-filter: blur(4px);
         }
         
         .agent i {
@@ -148,14 +138,8 @@
             text-decoration: none;
             font-weight: 500;
             font-size: 0.9rem;
-            transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            transition: 0.2s;
             margin-bottom: 6px;
-        }
-        
-        .nav-link i {
-            width: 22px;
-            font-size: 1.1rem;
-            text-align: center;
         }
         
         .nav-link:hover {
@@ -169,9 +153,7 @@
             background: linear-gradient(90deg, rgba(0, 194, 255, 0.2), rgba(0, 150, 255, 0.05));
             color: white;
             border-left: 3px solid var(--cyber-cyan);
-            box-shadow: 0 2px 8px rgba(0, 194, 255, 0.2);
         }
-        /* MAIN CONTENT */
         
         .main-content {
             margin-left: 280px;
@@ -179,7 +161,6 @@
             position: relative;
             z-index: 2;
         }
-        /* TOPBAR */
         
         .topbar {
             display: flex;
@@ -191,7 +172,6 @@
             border-radius: 28px;
             padding: 12px 24px;
             margin-bottom: 30px;
-            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
             flex-wrap: wrap;
             gap: 12px;
         }
@@ -203,7 +183,6 @@
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            letter-spacing: -0.3px;
         }
         
         .right-top-actions {
@@ -222,9 +201,7 @@
             font-weight: 500;
             text-decoration: none;
             transition: 0.2s;
-            font-size: 0.85rem;
             display: inline-flex;
-            align-items: center;
             gap: 8px;
         }
         
@@ -241,149 +218,121 @@
         
         .logout-btn:hover {
             background: #ff4d4d;
-            border-color: #ff9999;
-            box-shadow: 0 0 12px rgba(255, 77, 77, 0.5);
         }
-        /* GLASS FORM CARD */
         
-        .glass-card {
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+        
+        .stat-card {
+            background: rgba(12, 22, 40, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-dim);
+            border-radius: 28px;
+            padding: 20px;
+            text-align: center;
+            transition: 0.25s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(0, 194, 255, 0.4);
+        }
+        
+        .stat-title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+        
+        .stat-number {
+            font-size: 2.6rem;
+            font-weight: 800;
+            background: linear-gradient(145deg, #fff, #b0e0ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            line-height: 1.2;
+        }
+        
+        .stat-footer {
+            margin-top: 14px;
+            font-size: 0.7rem;
+            color: var(--cyber-cyan);
+        }
+        
+        .glass-actions {
             background: rgba(10, 18, 32, 0.65);
             backdrop-filter: blur(12px);
             border: 1px solid var(--border-dim);
             border-radius: 28px;
-            padding: 2rem;
-            transition: all 0.2s;
-            max-width: 700px;
-            margin: 0 auto;
-        }
-        
-        .glass-card:hover {
-            border-color: rgba(0, 194, 255, 0.35);
-            box-shadow: 0 12px 28px -12px rgba(0, 194, 255, 0.2);
+            padding: 1.8rem;
+            margin-top: 20px;
         }
         
         .section-header {
             display: flex;
             align-items: center;
             gap: 12px;
-            margin-bottom: 1.8rem;
-            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
             font-weight: 600;
             border-left: 4px solid var(--cyber-cyan);
             padding-left: 16px;
-        }
-        /* FORM STYLES */
-        
-        .form-group {
-            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
         }
         
-        .form-label {
+        .btn-group-grc {
             display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            justify-content: center;
             align-items: center;
-            gap: 8px;
-            font-weight: 500;
-            margin-bottom: 0.6rem;
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-            letter-spacing: 0.3px;
         }
         
-        .form-label i {
-            color: var(--cyber-cyan);
-            width: 20px;
-        }
-        
-        .form-control,
-        .form-select {
-            background: var(--input-bg);
+        .btn-grc {
+            background: rgba(0, 194, 255, 0.08);
             border: 1px solid rgba(0, 194, 255, 0.25);
-            border-radius: 18px;
-            padding: 12px 18px;
-            color: var(--text-primary);
-            font-family: 'Inter', sans-serif;
-            font-size: 0.9rem;
-            transition: all 0.2s;
-            width: 100%;
-            backdrop-filter: blur(4px);
-        }
-        
-        .form-control:focus,
-        .form-select:focus {
-            outline: none;
-            border-color: var(--cyber-cyan);
-            box-shadow: 0 0 0 3px rgba(0, 194, 255, 0.2);
-            background: rgba(10, 25, 45, 0.8);
-        }
-        
-        textarea.form-control {
-            min-height: 100px;
-            resize: vertical;
-        }
-        
-        .file-input {
-            padding: 10px 18px;
-        }
-        
-        .file-input::-webkit-file-upload-button {
-            background: rgba(0, 194, 255, 0.2);
-            border: none;
+            padding: 10px 20px;
             border-radius: 40px;
-            padding: 6px 16px;
-            color: white;
-            margin-right: 12px;
-            cursor: pointer;
-        }
-        
-        .btn-submit {
-            background: linear-gradient(95deg, #0f6bff, #00c6ff);
-            border: none;
-            padding: 12px 28px;
-            border-radius: 40px;
-            color: white;
-            font-weight: 700;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-            transition: 0.2s;
-            font-size: 0.9rem;
-            width: 100%;
-            justify-content: center;
-        }
-        
-        .btn-submit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 18px rgba(0, 194, 255, 0.3);
-        }
-        
-        .btn-cancel {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            padding: 10px 24px;
-            border-radius: 40px;
-            color: var(--text-secondary);
+            color: #eef5ff;
             text-decoration: none;
+            font-size: 0.85rem;
             font-weight: 500;
             transition: 0.2s;
             display: inline-flex;
-            align-items: center;
             gap: 8px;
-            margin-top: 1rem;
-            width: 100%;
-            justify-content: center;
         }
         
-        .btn-cancel:hover {
-            background: rgba(255, 77, 77, 0.2);
-            color: white;
-            border-color: #ff4d4d;
+        .btn-grc:hover {
+            background: var(--primary-accent);
+            border-color: var(--cyber-cyan);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 194, 255, 0.3);
         }
         
-        @media (max-width: 900px) {
+        .btn-pdf {
+            background: rgba(46, 204, 113, 0.15);
+            border-color: #2ecc71;
+        }
+        
+        .btn-pdf:hover {
+            background: #2ecc71;
+            color: #03070f;
+        }
+        
+        @media (max-width:900px) {
             .sidebar {
                 width: 70px;
-                padding: 1rem 0.4rem;
             }
             .sidebar-header h3,
             .agent div,
@@ -406,8 +355,8 @@
                 margin-left: 70px;
                 padding: 16px;
             }
-            .glass-card {
-                padding: 1.2rem;
+            .stats-grid {
+                grid-template-columns: 1fr;
             }
         }
         
@@ -427,22 +376,16 @@
 </head>
 
 <body>
-
-    <!-- SIDEBAR - consistent -->
     <div class="sidebar">
         <div class="sidebar-header">
             <h3><i class="fas fa-shield-haltered"></i> S I E M <span style="font-weight:500">SOC</span></h3>
-            <div class="agent">
-                <i class="fas fa-brain" style="color:#00c6ff; font-size: 1.8rem;"></i>
-                <div style="flex:1">
+            <div class="agent"><i class="fas fa-brain"></i>
+                <div>
                     <div style="font-size:0.85rem; font-weight:600">AI Defense Agent</div>
-                    <div style="font-size:0.7rem; display:flex; align-items:center; gap:4px; color:var(--text-secondary)">
-                        <span class="agent-status"></span> <span>active · real-time</span>
-                    </div>
+                    <div style="font-size:0.7rem; display:flex; align-items:center; gap:4px;"><span class="agent-status"></span> active · real-time</div>
                 </div>
             </div>
         </div>
-
         <ul class="nav-menu">
             <li><a class="nav-link" href="{{ url_for('dashboard') }}"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
             <li><a class="nav-link" href="{{ url_for('view_logs') }}"><i class="fas fa-database"></i> <span>Logs</span></a></li>
@@ -450,9 +393,8 @@
             <li><a class="nav-link" href="{{ url_for('devices') }}"><i class="fas fa-microchip"></i> <span>Devices</span></a></li>
             <li><a class="nav-link" href="{{ url_for('network_connections') }}"><i class="fas fa-chart-line"></i> <span>Network</span></a></li>
             <li><a class="nav-link" href="/sniffer"><i class="fas fa-eye"></i> <span>Live Sniffer</span></a></li>
-
-            <li><a class="nav-link" href="{{ url_for('grc_risks') }}"><i class="fas fa-exclamation-triangle"></i> <span>Risks</span></a></li>
-            <li><a class="nav-link" href="{{ url_for('grc_dashboard') }}"><i class="fas fa-balance-scale"></i> <span>GRC</span></a></li>
+            <li><a class="nav-link" href="/upload_logs"><i class="fas fa-cloud-upload-alt"></i> <span>Upload Logs</span></a></li>
+            <li><a class="nav-link active" href="{{ url_for('grc_dashboard') }}"><i class="fas fa-balance-scale"></i> <span>GRC</span></a></li>
             <li><a class="nav-link" href="{{ url_for('grc_risks') }}"><i class="fas fa-exclamation-triangle"></i> <span>Risks</span></a></li>
             <li><a class="nav-link" href="{{ url_for('grc_policies') }}"><i class="fas fa-file-alt"></i> <span>Policies</span></a></li>
             <li><a class="nav-link" href="{{ url_for('grc_compliance') }}"><i class="fas fa-check-double"></i> <span>Compliance</span></a></li>
@@ -461,73 +403,53 @@
             <li><a class="nav-link" href="{{ url_for('grc_kpi') }}"><i class="fas fa-chart-simple"></i> <span>KPI</span></a></li>
             <li><a class="nav-link" href="{{ url_for('admin_users') }}"><i class="fas fa-users-gear"></i> <span>Users</span></a></li>
         </ul>
-        <div style="font-size: 0.65rem; text-align: center; margin-top: 20px; color: #3e5a77;">
-            <i class="fas fa-shield-virus"></i> Zero Trust Ready
-        </div>
+        <div style="font-size:0.65rem; text-align:center; margin-top:20px; color:#3e5a77;"><i class="fas fa-shield-virus"></i> Zero Trust Ready</div>
     </div>
-
-    <!-- MAIN CONTENT -->
     <div class="main-content">
         <div class="topbar">
-            <div class="page-title">
-                <i class="fas fa-cloud-upload-alt"></i> Submit Analysis Request
+            <div class="page-title"><i class="fas fa-chalkboard-user"></i> Governance, Risk & Compliance (GRC)</div>
+            <div class="right-top-actions"><a class="action-btn" href="{{ url_for('report') }}"><i class="fas fa-file-pdf"></i> Report</a><a class="action-btn logout-btn" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></div>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-title"><i class="fas fa-skull-crosswalk" style="color:var(--danger-neon);"></i> High Risks</div>
+                <div class="stat-number">{{ risk_high }}</div>
+                <div class="stat-footer">requires immediate action</div>
             </div>
-            <div class="right-top-actions">
-                <a class="action-btn" href="{{ url_for('report') }}"><i class="fas fa-file-pdf"></i> Report</a>
-                <a class="action-btn logout-btn" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            <div class="stat-card">
+                <div class="stat-title"><i class="fas fa-bug" style="color:var(--warning-neon);"></i> Critical Incidents</div>
+                <div class="stat-number">{{ incident_critical }}</div>
+                <div class="stat-footer">open & unresolved</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title"><i class="fas fa-times-circle" style="color:var(--danger-neon);"></i> Non‑Compliant</div>
+                <div class="stat-number">{{ non_compliant }}</div>
+                <div class="stat-footer">control failures</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title"><i class="fas fa-file-alt" style="color:var(--cyber-cyan);"></i> Policies Due</div>
+                <div class="stat-number">{{ policies_due }}</div>
+                <div class="stat-footer">review / update needed</div>
             </div>
         </div>
-
-        <!-- GLASS FORM CARD -->
-        <div class="glass-card">
-            <div class="section-header">
-                <i class="fas fa-file-upload" style="color: var(--cyber-cyan);"></i>
-                <span>New Log Analysis Request</span>
+        <div class="glass-actions">
+            <div class="section-header"><i class="fas fa-cogs" style="color:var(--cyber-cyan);"></i><span>GRC Control Center</span><span style="margin-left:auto; font-size:0.7rem; background:rgba(0,194,255,0.2); padding:4px 12px; border-radius:20px;"><i class="fas fa-shield-alt"></i> Framework: ISO 27001 / NIST</span></div>
+            <div class="btn-group-grc">
+                <a href="{{ url_for('grc_risks') }}" class="btn-grc"><i class="fas fa-exclamation-triangle"></i> Risk Register</a>
+                <a href="{{ url_for('grc_heatmap') }}" class="btn-grc"><i class="fas fa-fire"></i> Risk Heatmap</a>
+                <a href="{{ url_for('grc_compliance') }}" class="btn-grc"><i class="fas fa-check-double"></i> Compliance Status</a>
+                <a href="{{ url_for('grc_incidents') }}" class="btn-grc"><i class="fas fa-bug"></i> Incident Tracker</a>
+                <a href="{{ url_for('grc_policies') }}" class="btn-grc"><i class="fas fa-file-alt"></i> Policy Manager</a>
+                <a href="{{ url_for('grc_bcp') }}" class="btn-grc"><i class="fas fa-database"></i> BCP / DRP</a>
+                <a href="{{ url_for('grc_kpi') }}" class="btn-grc"><i class="fas fa-chart-simple"></i> GRC KPIs</a>
+                <a href="{{ url_for('grc_report_pdf') }}" class="btn-grc btn-pdf"><i class="fas fa-file-pdf"></i> Full GRC Report (PDF)</a>
             </div>
-
-            <form method="POST" enctype="multipart/form-data" action="/manager/request">
-                <div class="form-group">
-                    <div class="form-label"><i class="fas fa-file"></i> Log File (.log, .txt, .csv)</div>
-                    <input type="file" name="file" class="form-control file-input" accept=".log,.txt,.csv" required>
-                    <div style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 5px;">Maximum file size: 10MB (adjust if needed)</div>
-                </div>
-
-                <div class="form-group">
-                    <div class="form-label"><i class="fas fa-align-left"></i> Description (optional)</div>
-                    <textarea name="description" class="form-control" placeholder="Add any context or notes about this log file..."></textarea>
-                </div>
-
-                <button type="submit" class="btn-submit">
-                    <i class="fas fa-paper-plane"></i> Submit Request
-                </button>
-
-                <a href="{{ url_for('manager_requests') }}" class="btn-cancel">
-                    <i class="fas fa-times"></i> Cancel
-                </a>
-            </form>
         </div>
-
-        <!-- Info footer -->
-        <div style="margin-top: 32px; padding: 16px 0; border-top: 1px solid rgba(0,194,255,0.1); display: flex; justify-content: space-between; font-size: 0.7rem; flex-wrap: wrap;">
-            <div><i class="fas fa-chart-line"></i> Submitted logs will be analyzed by SOC admin</div>
-            <div><i class="fas fa-shield-alt"></i> You will be notified when the report is ready</div>
+        <div style="margin-top:32px; padding:16px 0; border-top:1px solid rgba(0,194,255,0.1); display:flex; justify-content:space-between; font-size:0.7rem;">
+            <div><i class="fas fa-chart-line"></i> Real‑time risk posture • Automated compliance mapping</div>
+            <div><i class="fas fa-clock"></i> Last GRC assessment: today 08:32 UTC</div>
         </div>
     </div>
-
-    <!-- Optional: simple client-side validation -->
-    <script>
-        // Ensure file is selected before submit
-        const form = document.querySelector('form');
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                const fileInput = document.querySelector('input[type="file"]');
-                if (fileInput && fileInput.files.length === 0) {
-                    e.preventDefault();
-                    alert('Please select a log file to upload.');
-                }
-            });
-        }
-    </script>
 </body>
 
 </html>

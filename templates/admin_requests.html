@@ -16,7 +16,7 @@
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: auto;
         }
         
@@ -25,11 +25,13 @@
             border-radius: 28px;
             padding: 1.5rem;
             margin-bottom: 1.5rem;
+            overflow-x: auto;
         }
         
         table {
             width: 100%;
             border-collapse: collapse;
+            min-width: 800px;
         }
         
         th,
@@ -47,16 +49,30 @@
             color: white;
             border: none;
             cursor: pointer;
+            display: inline-block;
+            font-size: 0.8rem;
         }
         
         .pending {
             background: #e67e22;
             padding: 0.2rem 0.5rem;
             border-radius: 20px;
+            font-size: 0.8rem;
         }
         
         .completed {
             background: #2ecc71;
+            padding: 0.2rem 0.5rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+        
+        .analyzing {
+            background: #f1c40f;
+            color: #1e1e2f;
+            padding: 0.2rem 0.5rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
         }
         
         .flash {
@@ -66,44 +82,105 @@
             margin-bottom: 1rem;
             text-align: center;
         }
+        
+        .risk-badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 30px;
+            font-weight: bold;
+        }
+        
+        .risk-high {
+            background: #b91c1c;
+            color: white;
+        }
+        
+        .risk-medium {
+            background: #e67e22;
+            color: white;
+        }
+        
+        .risk-low {
+            background: #2ecc71;
+            color: #1e1e2f;
+        }
+        
+        .risk-none {
+            background: #2c3e50;
+            color: #aaa;
+        }
+        
+        a.risk-link {
+            color: #0f6bff;
+            text-decoration: none;
+        }
+        
+        a.risk-link:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 
 <body>
     <div class="container">
-        <h1>📋 طلبات تحليل الملفات (من المانجر)</h1>
+        <h1>Requests</h1>
         {% with messages = get_flashed_messages() %}{% if messages %}
         <div class="flash">{{ messages[0] }}</div>{% endif %}{% endwith %}
         <div class="card">
             <table>
                 <thead>
-                    <td>التاريخ</th>
-                        <th>المانجر</th>
+                    <tr>
+                        <th>التاريخ</th>
+                        <th>المسول</th>
                         <th>الملف</th>
                         <th>الوصف</th>
                         <th>الحالة</th>
+                        <th>درجة الخطر</th>
+                        <th>الخطر المرتبط</th>
                         <th></th>
-                        </tr>
+                    </tr>
                 </thead>
                 <tbody>
                     {% for req in requests %}
                     <tr>
-                        <td>{{ req.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>{{ req.created_at.strftime('%Y-%m-%d %H:%M') if req.created_at else '-' }}</td>
                         <td>{{ req.manager_username }}</td>
                         <td>{{ req.original_filename }}</td>
                         <td>{{ req.request_message or '-' }}</td>
-                        <td>{% if req.status == 'pending' %}<span class="pending">قيد الانتظار</span>{% elif req.status == 'analyzing' %}<span class="pending">جارٍ التحليل...</span>{% else %}<span class="completed">مكتمل</span>{% endif %}</td>
+                        <td>
+                            {% if req.status == 'pending' %}
+                            <span class="pending">قيد الانتظار</span> {% elif req.status == 'analyzing' %}
+                            <span class="analyzing">جارٍ التحليل...</span> {% elif req.status == 'completed' %}
+                            <span class="completed">مكتمل</span> {% else %}
+                            <span>{{ req.status }}</span> {% endif %}
+                        </td>
+                        <td>
+                            {% if req.risk_score is not none %} {% set risk_score = req.risk_score|int %} {% if risk_score >= 50 %}
+                            <span class="risk-badge risk-high">{{ risk_score }}</span> {% elif risk_score >= 30 %}
+                            <span class="risk-badge risk-medium">{{ risk_score }}</span> {% else %}
+                            <span class="risk-badge risk-low">{{ risk_score }}</span> {% endif %} {% else %}
+                            <span class="risk-badge risk-none">-</span> {% endif %}
+                        </td>
+                        <td>
+                            {% if req.risk_id %}
+                            <a href="{{ url_for('grc_edit_risk', id=req.risk_id) }}" class="risk-link" target="_blank">عرض الخطر #{{ req.risk_id }}</a> {% else %}
+                            <span class="risk-badge risk-none">-</span> {% endif %}
+                        </td>
                         <td>
                             {% if req.status == 'pending' %}
                             <form method="POST" action="{{ url_for('admin_analyze', req_id=req.id) }}" style="display:inline;">
                                 <button type="submit" class="btn-analyze">تحليل الملف</button>
                             </form>
                             {% elif req.status == 'completed' %}
-                            <span class="btn-analyze" style="background:#2c3e50;">تم التحليل</span> {% else %}
+                            <span class="btn-analyze" style="background:#2c3e50; cursor:default;">تم التحليل</span> {% else %}
                             <span>جارٍ...</span> {% endif %}
                         </td>
-                        </td>
-                        {% endfor %}
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" style="text-align:center;">لا توجد طلبات تحليل حتى الآن</td>
+                    </tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </div>
